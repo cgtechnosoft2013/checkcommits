@@ -1,0 +1,11 @@
+language: php
+
+php:
+  - 5.5
+
+before_install:
+  - sudo apt-get update -qq  
+
+install:
+  - composer self-update
+  - npm install -g less
