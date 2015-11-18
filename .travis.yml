@@ -1,0 +1,34 @@
+language: php
+
+php:
+  - 5.5
+
+before_install:
+  - sudo apt-get update -qq  
+
+install:
+  - composer self-update
+  - npm install -g less
+  - sudo apt-get install python-pip
+  - sudo apt-get install expect
+  - sudo pip install invoke==0.7.0
+
+    # Install and configure Apache and php-fpm
+  - sudo apt-get install -y --force-yes apache2 libapache2-mod-fastcgi php5-curl php5-intl php5-sqlite
+  - sudo cp ~/.phpenv/versions/$(phpenv version-name)/etc/php-fpm.conf.default ~/.phpenv/versions/$(phpenv version-name)/etc/php-fpm.conf
+  - sudo a2enmod rewrite actions fastcgi alias
+  - echo "cgi.fix_pathinfo = 1" >> ~/.phpenv/versions/$(phpenv version-name)/etc/php.ini
+  - sudo cp -f .travis.d/travis-ci-apache /etc/apache2/sites-available/default
+  - sudo sed -i -e "s,%TRAVIS_BUILD_DIR%,$(pwd)/web,g" /etc/apache2/sites-available/default
+
+    # Start server
+  - sudo /etc/init.d/php5-fpm stop # stop global php5-fpm listening on port 9000
+  - ~/.phpenv/versions/$(phpenv version-name)/sbin/php-fpm # starting local configured
+  - sudo /etc/init.d/apache2 restart
+
+    # PhantomJS
+  - phantomjs --webdriver=8643 > /dev/null 2>&1 &
+  - sleep 3 # give phantomJS some time to start
+
+before_script:
+  - mysql -e "create database IF NOT EXISTS test_app;" -u root
