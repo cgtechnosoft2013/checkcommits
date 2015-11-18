@@ -5,5 +5,6 @@
 </head>
 <body>
 	<div>First</div>
+	<div>Second</div>
 </body>
 </html>
